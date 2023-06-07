@@ -22,12 +22,12 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
 
     // Demandes d'aides
     Route::resource('demands',DemandController::class)->except([
-        'create', 'update'
+        'create', 'edit'
     ]);
 
     // Commentaires
     Route::resource('comments', CommentController::class)->except([
-        'create', 'update'
+        'create', 'edit'
     ]);
 
     // Types d'handicaps
@@ -37,7 +37,7 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
 
     // Utilisateurs
     Route::resource('users',UserController::class)->except([
-        'create', 'update', 'me'
+        'create', 'update', 'edit'
     ]);
 
     // Déconnexion

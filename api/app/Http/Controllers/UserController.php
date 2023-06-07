@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
 
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -27,13 +27,27 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(): JsonResponse
     {
-        $users = User::all();
-        if (count($users) < 1){
-            return response(["message" => "Aucune utilisateur enregistré", 200]);
+        $users = User::with(['comments', 'demands', 'disabilities'])->get();
+
+        if ($users->isEmpty()) {
+            return response()->json(["message" => "Aucun utilisateur enregistré"], 200);
         }
-        return response($users, 200);
+
+        $usersToReturn = [];
+
+        foreach ($users as $user) {
+            if ($user->volunteer) {
+                $userToReturn = User::with('comments')->find($user->id);
+            } else {
+                $userToReturn = User::with('demands', 'disabilities')->find($user->id);
+            }
+
+            $usersToReturn[] = $userToReturn;
+        }
+
+        return response()->json($usersToReturn, 200);
     }
 
     /**
@@ -49,7 +63,17 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        return User::findOrFail($id);
+        $user = User::findOrFail($id);
+
+        //Si l'utilisateur est un volontaire je fournis ses avis
+        if ($user->volunteer){
+            $userToReturn = User::with('comments')->find($user);
+        } else{
+            //Sinon je fournis ses demandes et son/ses handicaps
+            $userToReturn = User::with('demands', 'disabilities')->find($user);
+        }
+
+        return $userToReturn;
     }
 
     /**

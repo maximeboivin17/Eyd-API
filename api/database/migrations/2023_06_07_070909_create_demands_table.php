@@ -17,11 +17,16 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('latitude');
             $table->string('longitude');
-            $table->integer('state');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->boolean('state');
             $table->date('event_date');
 //            $table->date('release_date');
+
+            $table->unsignedBigInteger('volunteer_id')->nullable();
+            $table->unsignedBigInteger('disabled_id');
             $table->timestamps();
+
+            $table->foreign('volunteer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('disabled_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

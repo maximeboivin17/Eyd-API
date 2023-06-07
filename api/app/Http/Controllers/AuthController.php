@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $fields = $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -37,20 +38,23 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $fields = $request->validate([
             'email' => 'required|string',
             'password' => 'required|string'
         ]);
 
-        // Check email
+        // Vérifier l'email
         $user = User::where('email', $fields['email'])->first();
 
-        // Check password
-        if(!$user || !Hash::check($fields['password'], $user->password)) {
-            return response([
-                'message' => 'Votre mot de passe n\'est pas le bon'
-            ], 401);
+        // Vérifier le mot de passe
+        if (!$user || !Hash::check($fields['password'], $user->password)) {
+            if (!$user) {
+                return response()->json(['message' => 'Vous n\'avez pas de compte, veuillez en créer un !'], 401);
+            } else {
+                return response()->json(['message' => 'Mot de passe incorrect'], 401);
+            }
         }
 
         $token = $user->createToken('myapptoken')->plainTextToken;
@@ -60,10 +64,11 @@ class AuthController extends Controller
             'token' => $token
         ];
 
-        return response($response, 201);
+        return response()->json($response, 201);
     }
 
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         auth()->user()->tokens()->delete();
 
         return [
