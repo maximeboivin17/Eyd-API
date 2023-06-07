@@ -13,7 +13,15 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        return response()->json($user);
+        //Si l'utilisateur est un volontaire je fournis ses avis
+        if ($user){
+            $userToReturn = User::with('comments')->find($user);
+        } else{
+            //Sinon je fournis ses demandes et son/ses handicaps
+            $userToReturn = User::with('demands', 'disabilities')->find($user);
+        }
+
+        return response()->json($userToReturn);
     }
 
     /**
