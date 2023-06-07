@@ -14,7 +14,7 @@ class UserController extends Controller
         $user = $request->user();
 
         //Si l'utilisateur est un volontaire je fournis ses avis
-        if ($user){
+        if ($user->volunteer){
             $userToReturn = User::with('comments')->find($user);
         } else{
             //Sinon je fournis ses demandes et son/ses handicaps

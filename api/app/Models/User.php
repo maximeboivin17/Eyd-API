@@ -29,14 +29,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'pivot'
     ];
 
     /**
-     * S'il n'est pas volontaire, obtiens le handicap de l'utilisateur
+     * S'il n'est pas volontaire, obtiens le(s) handicap(s) de l'utilisateur
      */
     public function disabilities(): BelongsToMany
     {
-        return $this->belongsToMany(Disability::class);
+        return $this->belongsToMany(Disability::class, 'users_disabilities');
     }
 
     /**

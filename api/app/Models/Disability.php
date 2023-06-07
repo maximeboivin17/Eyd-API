@@ -16,8 +16,12 @@ class Disability extends Model
         'name'
     ];
 
+    protected $hidden = [
+        'pivot'
+    ];
+
     /**
-     * Get the users for the disability
+     * Potentiellement inutile, à voir si c'est utile vraiment
      */
     public function users(): BelongsToMany
     {
