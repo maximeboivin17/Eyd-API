@@ -18,7 +18,7 @@ class Demand extends Model
         'state',
         'user_id',
         'event_date',
-        'release_date'
+//        'release_date'
     ];
 
     /**

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('state');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('event_date');
-            $table->date('release_date');
+//            $table->date('release_date');
             $table->timestamps();
         });
     }
