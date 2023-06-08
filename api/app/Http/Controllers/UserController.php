@@ -29,10 +29,6 @@ class UserController extends Controller
     {
         $users = User::all();
 
-        if ($users->isEmpty()) {
-            return response()->json(["message" => "Aucun utilisateur enregistré"], 200);
-        }
-
         $usersToReturn = [];
 
         foreach ($users as $user) {

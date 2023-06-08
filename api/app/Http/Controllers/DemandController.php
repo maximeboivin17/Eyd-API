@@ -3,20 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demand;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class DemandController extends Controller
 {
-    public function index(): Response
+    public function index(): Collection
     {
-        $demands = Demand::all();
-        if (count($demands) < 1){
-            return response(["message" => "Aucune demande en attente"]);
-        }
-        return response($demands);
+        return Demand::all();
     }
 
     public function store(Request $request)

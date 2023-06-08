@@ -3,20 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    public function index(): Response
+    public function index(): Collection
     {
-        $comments = Comment::all();
-        if (count($comments) < 1){
-            return response(["message" => "Aucune avis"]);
-        }
-        return response($comments);
+        return Comment::all();
     }
 
     public function store(Request $request)

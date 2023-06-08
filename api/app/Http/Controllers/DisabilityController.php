@@ -3,18 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Disability;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Database\Eloquent\Collection;
 
 class DisabilityController extends Controller
 {
-    public function index(): Response
+    public function index(): Collection
     {
-        $demands = Disability::all();
-        if (count($demands) < 1){
-            return response(["message" => "Aucun handicap"]);
-        }
-        return response($demands);
+        return Disability::all();
     }
 
     public function show(string $id)
