@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Demand;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,21 +12,31 @@ class DemandController extends Controller
 {
     public function index(): Collection
     {
-        return Demand::all();
+        // On veut que les demandes qui sont ouvertes et qui n'ont pas de personne qui va aider la personne dans le besoin
+        $demands = Demand::where('state', false)->get();
+
+        return $demands;
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-//        $request->validate([
-//            'name' => 'required',
-//            'latitude' => 'required',
-//            'longitude' => 'required',
-//            'state' => 'required',
-//            'user_id' => 'required',
-//            'event_date' => 'required',
-//        ]);
+        $request->validate([
+            'name' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
 
-        return Demand::create($request->all());
+        $demandData = $request->all();
+
+        $demandData['state'] = false;
+        $demandData['disabled_id'] = Auth::id();
+
+        // Supprimer ça pcq j'ai timestamps() avec created_at et updated_at dans ma migration
+        $demandData['event_date'] = now();
+
+        $demand = Demand::create($demandData);
+
+        return response()->json($demand, 201);
     }
 
     public function show(string $id)
@@ -33,7 +44,7 @@ class DemandController extends Controller
         return Demand::findOrFail($id);
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         $demand = Demand::findOrFail($id);
 
@@ -47,7 +58,7 @@ class DemandController extends Controller
         return $demand;
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $demand = Demand::findOrFail($id);
 
