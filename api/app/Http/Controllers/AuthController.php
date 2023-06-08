@@ -16,7 +16,13 @@ class AuthController extends Controller
             'email' => 'required|string|unique:users,email',
             'volunteer' => 'required|boolean',
             'phone' => 'required|string',
-            'password' => 'required|string|confirmed'
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ]
         ]);
 
         $user = User::create([

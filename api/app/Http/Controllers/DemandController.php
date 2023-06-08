@@ -3,26 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demand;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class DemandController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $demands = Demand::all();
         if (count($demands) < 1){
-            return response(["message" => "Aucune demande en attente", 200]);
+            return response(["message" => "Aucune demande en attente"]);
         }
-        return response($demands, 200);
+        return response($demands);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
 //        $request->validate([
@@ -37,30 +33,36 @@ class DemandController extends Controller
         return Demand::create($request->all());
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         return Demand::findOrFail($id);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $demand = Demand::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est le créateur de la demande
+        if ($demand->disabled_id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cette demande.']);
+        }
+
         $demand->update($request->all());
 
         return $demand;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        return Demand::destroy($id);
+        $demand = Demand::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est le créateur de la demande
+        if ($demand->disabled_id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à supprimer cette demande.']);
+        }
+
+        Demand::destroy($id);
+
+        return response()->json(['message' => 'La demande a été supprimé avec succès.']);
     }
 }

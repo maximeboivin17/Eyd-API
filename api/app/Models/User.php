@@ -53,8 +53,17 @@ class User extends Authenticatable
      */
     public function demands(): HasMany
     {
-        return $this->hasMany(Demand::class);
+        return $this->hasMany(Demand::class, 'disabled_id');
     }
+
+    /**
+     * S'il est volontaire, obtiens jspquoi
+     */
+    public function applicantDemand(): HasMany
+    {
+        return $this->hasMany(Demand::class, 'volunteer_id');
+    }
+
 
     /**
      * The attributes that should be cast.

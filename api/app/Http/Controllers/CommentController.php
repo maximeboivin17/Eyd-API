@@ -3,26 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $comments = Comment::all();
         if (count($comments) < 1){
-            return response(["message" => "Aucune avis", 200]);
+            return response(["message" => "Aucune avis"]);
         }
-        return response($comments, 200);
+        return response($comments);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
 //        $request->validate([
@@ -37,30 +33,36 @@ class CommentController extends Controller
         return Comment::create($request->all());
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         return Comment::findOrFail($id);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $comment = Comment::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est le créateur du commentaire
+        if ($comment->disabled_id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier ce commentaire.']);
+        }
+
         $comment->update($request->all());
 
         return $comment;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        return Comment::destroy($id);
+        $comment = Comment::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est le créateur du commentaire
+        if ($comment->disabled_id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à supprimer ce commentaire.']);
+        }
+
+        Comment::destroy($id);
+
+        return response()->json(['message' => 'Le commentaire a été supprimé avec succès.']);
     }
 }

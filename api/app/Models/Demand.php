@@ -16,16 +16,19 @@ class Demand extends Model
         'latitude',
         'longitude',
         'state',
-        'user_id',
         'event_date',
+        'volunteer_id',
+        'disabled_id',
 //        'release_date'
     ];
 
-    /**
-     * Get the user that owns the request
-     */
-    public function user(): BelongsTo
+    public function volunteer(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'volunteer_id');
+    }
+
+    public function disabled(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'disabled_id');
     }
 }

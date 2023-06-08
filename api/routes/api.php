@@ -37,7 +37,7 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
 
     // Utilisateurs
     Route::resource('users',UserController::class)->except([
-        'create', 'update', 'edit'
+        'create', 'store', 'edit'
     ]);
 
     // Déconnexion

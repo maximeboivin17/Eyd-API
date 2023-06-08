@@ -8,21 +8,15 @@ use Illuminate\Http\Response;
 
 class DisabilityController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): Response
     {
         $demands = Disability::all();
         if (count($demands) < 1){
-            return response(["message" => "Aucun handicap", 200]);
+            return response(["message" => "Aucun handicap"]);
         }
-        return response($demands, 200);
+        return response($demands);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         return Disability::findOrFail($id);

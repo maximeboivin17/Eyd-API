@@ -3,33 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        //Si l'utilisateur est un volontaire je fournis ses avis
-        if ($user->volunteer){
+        if ($user->volunteer) {
+            // Si l'utilisateur est un volontaire, fournir ses avis
             $userToReturn = User::with('comments')->find($user);
-        } else{
-            //Sinon je fournis ses demandes et son/ses handicaps
+        } else {
+            // Sinon, fournir ses demandes et son/ses handicaps
             $userToReturn = User::with('demands', 'disabilities')->find($user);
         }
 
         return response()->json($userToReturn);
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(): JsonResponse
     {
-        $users = User::with(['comments', 'demands', 'disabilities'])->get();
+        $users = User::all();
 
         if ($users->isEmpty()) {
             return response()->json(["message" => "Aucun utilisateur enregistré"], 200);
@@ -47,20 +45,9 @@ class UserController extends Controller
             $usersToReturn[] = $userToReturn;
         }
 
-        return response()->json($usersToReturn, 200);
+        return response()->json($usersToReturn);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $user = User::findOrFail($id);
@@ -76,19 +63,31 @@ class UserController extends Controller
         return $userToReturn;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est l'utilisateur connecté
+        if ($user->id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cette utilisateur.']);
+        }
+
+        $user->update($request->all());
+
+        return $user;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        // Vérifier si l'utilisateur actuel est l'utilisateur connecté
+        if ($user->id !== Auth::id()) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à supprimer cet utilisateur.']);
+        }
+
+        User::destroy($id);
+
+        return response()->json(['message' => 'Votre compte a été supprimé avec succès.']);
     }
 }
