@@ -10,20 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function me(Request $request): JsonResponse
+    public function me()
     {
-        $user = $request->user();
+        $userId = Auth::id();
 
-        if ($user->volunteer) {
+        if (Auth::user()->volunteer) {
             // Si l'utilisateur est un volontaire, fournir ses avis
-            $userToReturn = User::with('comments')->find($user);
+            $userToReturn = User::with('comments')->where('id', $userId)->first();
         } else {
             // Sinon, fournir ses demandes et son/ses handicaps
-            $userToReturn = User::with('demands', 'disabilities')->find($user);
+            $userToReturn = User::with('demands', 'disabilities')->where('id', $userId)->first();
         }
 
-        return response()->json($userToReturn);
+        return $userToReturn;
     }
+
 
     public function index(): JsonResponse
     {
