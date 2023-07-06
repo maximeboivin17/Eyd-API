@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Demand extends Model
 {
@@ -16,19 +17,20 @@ class Demand extends Model
         'latitude',
         'longitude',
         'state',
-        'event_date',
-        'volunteer_id',
-        'disabled_id',
-//        'release_date'
+        'created_by',
+        'updated_by',
     ];
 
-    public function volunteer(): BelongsTo
+    /**
+     * Potentiellement inutile, à voir si c'est utile vraiment
+     */
+    public function potentialVolunteers(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'volunteer_id');
+        return $this->belongsToMany(User::class, 'demands_users');
     }
 
-    public function disabled(): BelongsTo
+    public function owner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'disabled_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

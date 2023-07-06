@@ -15,18 +15,21 @@ class CommentController extends Controller
         return Comment::all();
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-//        $request->validate([
-//            'name' => 'required',
-//            'latitude' => 'required',
-//            'longitude' => 'required',
-//            'state' => 'required',
-//            'user_id' => 'required',
-//            'event_date' => 'required',
-//        ]);
+        $request->validate([
+            'note' => 'required',
+            'volunteer_id' => 'required',
+        ]);
 
-        return Comment::create($request->all());
+        $commentData = $request->all();
+
+        //TODO: Changer ça pour mettre l'utilisateur mettant l'avis avec Auth::id() et automatiquement le volunteer_id de la demand ici
+        $commentData['created_by'] = Auth::id();
+
+        $comment = Comment::create($commentData);
+
+        return response()->json($comment, 201);
     }
 
     public function show(string $id)
@@ -34,15 +37,16 @@ class CommentController extends Controller
         return Comment::findOrFail($id);
     }
 
-    public function update(Request $request, string $id): JsonResponse
+    public function update(Request $request, string $id)
     {
         $comment = Comment::findOrFail($id);
 
         // Vérifier si l'utilisateur actuel est le créateur du commentaire
-        if ($comment->disabled_id !== Auth::id()) {
+        if ($comment->created_by !== Auth::id()) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier ce commentaire.']);
         }
 
+        $comment->updated_by = Auth::id();
         $comment->update($request->all());
 
         return $comment;

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DemandController;
+use App\Http\Controllers\DemandUserController;
 use App\Http\Controllers\DisabilityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -23,6 +24,11 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
     // Demandes d'aides
     Route::resource('demands',DemandController::class)->except([
         'create', 'edit'
+    ]);
+
+    // Jointure aide/volontaire
+    Route::resource('demands-users',DemandUserController::class)->only([
+        'show', 'store', 'update'
     ]);
 
     // Commentaires

@@ -29,30 +29,30 @@ class DemandController extends Controller
         $demandData = $request->all();
 
         $demandData['state'] = false;
-        $demandData['disabled_id'] = Auth::id();
-
-        // Supprimer ça pcq j'ai timestamps() avec created_at et updated_at dans ma migration
-        $demandData['event_date'] = now();
+        $demandData['created_by'] = Auth::id();
 
         $demand = Demand::create($demandData);
 
         return response()->json($demand, 201);
     }
 
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
-        return Demand::findOrFail($id);
+        $demand = Demand::with('potentialVolunteers')->findOrFail($id);
+
+        return response()->json($demand);
     }
 
-    public function update(Request $request, string $id): JsonResponse
+    public function update(Request $request, string $id)
     {
         $demand = Demand::findOrFail($id);
 
         // Vérifier si l'utilisateur actuel est le créateur de la demande
-        if ($demand->disabled_id !== Auth::id()) {
+        if ($demand->created_by !== Auth::id()) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cette demande.']);
         }
 
+        $demand->updated_by = Auth::id();
         $demand->update($request->all());
 
         return $demand;
@@ -63,7 +63,7 @@ class DemandController extends Controller
         $demand = Demand::findOrFail($id);
 
         // Vérifier si l'utilisateur actuel est le créateur de la demande
-        if ($demand->disabled_id !== Auth::id()) {
+        if ($demand->created_by !== Auth::id()) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à supprimer cette demande.']);
         }
 

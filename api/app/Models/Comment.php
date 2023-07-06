@@ -15,16 +15,22 @@ class Comment extends Model
         'description',
         'note',
         'volunteer_id',
-        'disabled_id',
+        'created_by',
+        'updated_by',
     ];
+
+//    protected $casts = [
+//        'created_by' => 'owner',
+//        'updated_by' => 'owner',
+//    ];
 
     public function volunteer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'volunteer_id');
     }
 
-    public function disabled(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'disabled_id');
-    }
+//    public function owner(): BelongsTo
+//    {
+//        return $this->belongsTo(User::class, 'created_by');
+//    }
 }
