@@ -50,9 +50,9 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         //Si l'utilisateur est un volontaire je fournis ses avis
-        if ($user->volunteer){
+        if ($user->volunteer) {
             $userToReturn = User::with('comments')->find($user);
-        } else{
+        } else {
             //Sinon je fournis ses demandes et son/ses handicaps
             $userToReturn = User::with('demands', 'disabilities')->find($user);
         }
@@ -60,7 +60,7 @@ class UserController extends Controller
         return $userToReturn;
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
         $user = User::findOrFail($id);
 
@@ -74,7 +74,7 @@ class UserController extends Controller
         return $user;
     }
 
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         $user = User::findOrFail($id);
 
@@ -86,5 +86,19 @@ class UserController extends Controller
         User::destroy($id);
 
         return response()->json(['message' => 'Votre compte a été supprimé avec succès.']);
+    }
+
+    public function getAllMessages()
+    {
+        $user = auth()->user();
+
+        $sentMessages = $user->sentMessages()->with('receiver')->get();
+        $receivedMessages = $user->receivedMessages()->with('sender')->get();
+
+        $messages = $sentMessages->merge($receivedMessages);
+
+        $sortedMessages = $messages->sortBy('created_at');
+
+        return response()->json($sortedMessages);
     }
 }
