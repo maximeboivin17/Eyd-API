@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Demand;
+use GuzzleHttp\Client;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,10 @@ class DemandController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        if (Auth::user()->volunteer) {
+            return response()->json(['message' => 'Vous n\'êtes pas autorisé à créer une demande.'], 403);
+        }
+
         $request->validate([
             'name' => 'required',
             'latitude' => 'required',
@@ -30,6 +35,9 @@ class DemandController extends Controller
 
         $demandData['state'] = false;
         $demandData['created_by'] = Auth::id();
+
+        $address = $this->getAddressFromCoordinates($demandData['latitude'], $demandData['longitude']);
+        $demandData['address'] = $address;
 
         $demand = Demand::create($demandData);
 
@@ -70,5 +78,24 @@ class DemandController extends Controller
         Demand::destroy($id);
 
         return response()->json(['message' => 'La demande a été supprimé avec succès.']);
+    }
+
+    private function getAddressFromCoordinates($latitude, $longitude)
+    {
+        $client = new Client();
+        $url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=$latitude&lon=$longitude";
+
+        try {
+            $response = $client->get($url);
+            $data = json_decode($response->getBody(), true);
+
+            if (isset($data['display_name'])) {
+                return $data['display_name'];
+            } else {
+                return null;
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
