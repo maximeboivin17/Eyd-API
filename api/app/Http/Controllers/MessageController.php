@@ -14,21 +14,29 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
-    public function store(Request $request)
+
+    public function store(Request $request, $receiverId)
     {
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Vous devez être connecté pour envoyer un message'], 401);
+        }
+    
+        $user = Auth::user();
+    
         $request->validate([
-            'sender_id' => 'required|exists:users,id',
-            'receiver_id' => 'required|exists:users,id',
             'content' => 'required',
         ]);
-
-        // Vérifier si l'utilisateur qui veut envoyer un message est l'utilisateur connecté
-        if ($request->sender_id !== Auth::id()) {
-            return response()->json(['message' => 'Vous n\'êtes pas autorisé à créer un message pour un autre utilisateur']);
-        }
-
-        $message = Message::create($request->all());
-
+    
+        $data = [
+            'sender_id' => $user->id,
+            'receiver_id' => $receiverId,
+            'content' => $request->input('content'),
+        ];
+    
+        $message = Message::create($data);
+    
         return response()->json($message, 201);
     }
+    
 }

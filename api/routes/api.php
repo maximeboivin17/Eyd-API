@@ -48,10 +48,8 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
         'index', 'show'
     ]);
 
-    // Types d'handicaps
-    Route::resource('messages', MessageController::class)->only([
-        'index', 'store'
-    ]);
+    // Messages
+    Route::post('/messages/{receiverId}', [MessageController::class, 'store']);
 
     // Utilisateurs
     Route::resource('users',UserController::class)->except([
