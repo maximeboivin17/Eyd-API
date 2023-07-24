@@ -136,8 +136,14 @@ class UserController extends Controller
             $query->where('sender_id', $otherUserId)
                 ->where('receiver_id', $user->id);
         })
-        ->orderBy('created_at', 'desc')
-        ->get();
+        ->orderBy('created_at', 'asc')
+        ->get()
+        ->map(function ($message) use ($user) {
+            // Ajouter la propriété "is_me" pour indiquer si l'utilisateur actuel est l'expéditeur ou le destinataire
+            $message->is_me = $message->sender_id === $user->id;
+
+            return $message;
+        });
 
         return response()->json($conversations);
     }
