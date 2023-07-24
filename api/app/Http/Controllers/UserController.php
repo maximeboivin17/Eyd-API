@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
@@ -87,18 +88,62 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Votre compte a été supprimé avec succès.']);
     }
+    
+
 
     public function getAllMessages()
     {
         $user = auth()->user();
-
-        $sentMessages = $user->sentMessages()->with('receiver')->get();
-        $receivedMessages = $user->receivedMessages()->with('sender')->get();
-
-        $messages = $sentMessages->merge($receivedMessages);
-
-        $sortedMessages = $messages->sortBy('created_at');
-
-        return response()->json($sortedMessages);
+    
+        $conversations = Message::where(function ($query) use ($user) {
+            $query->where('sender_id', $user->id)
+                ->orWhere('receiver_id', $user->id);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->unique(function ($message) use ($user) {
+            return $message->sender_id === $user->id ? $message->receiver_id : $message->sender_id;
+        });
+    
+        // Afficher seulement les informations de l'autre utilisateur dans chaque message
+        $conversations->map(function ($message) use ($user) {
+            if ($message->sender_id === $user->id) {
+                $otherUser = User::find($message->receiver_id);
+            } else {
+                $otherUser = User::find($message->sender_id);
+            }
+    
+            unset($message->sender_id);
+            unset($message->receiver_id);
+    
+            $message->other_user = $otherUser;
+    
+            return $message;
+        });
+    
+        return response()->json($conversations);
     }
+
+    public function getConversationsWithUser($otherUserId)
+    {
+        $user = auth()->user();
+
+        $conversations = Message::where(function ($query) use ($user, $otherUserId) {
+            $query->where('sender_id', $user->id)
+                ->where('receiver_id', $otherUserId);
+        })
+        ->orWhere(function ($query) use ($user, $otherUserId) {
+            $query->where('sender_id', $otherUserId)
+                ->where('receiver_id', $user->id);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+        return response()->json($conversations);
+    }
+    
+    
+    
+    
+
 }

@@ -25,6 +25,9 @@ Route::group(['middleware' => ['auth:sanctum']], function (){
     // Récupérer la liste de mes messages
     Route::get('/my-messages', [UserController::class, 'getAllMessages']);
 
+    Route::get('/my-messages/{otherUserId}', [UserController::class, 'getConversationsWithUser']);
+
+
     // Demandes d'aides
     Route::resource('demands',DemandController::class)->except([
         'create', 'edit'
