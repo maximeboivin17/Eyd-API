@@ -89,8 +89,14 @@ class DemandController extends Controller
             $response = $client->get($url);
             $data = json_decode($response->getBody(), true);
 
-            if (isset($data['address'])) {
-                return $data['address'];
+            if (isset($data['display_name'])) {
+                $result =
+                    (isset($data['address']['house_number']) ? $data['address']['house_number'] : '') .' '.
+                    (isset($data['address']['road']) ? $data['address']['road'] : '') .' '.
+                    (isset($data['address']['postcode']) ? $data['address']['postcode'] : '') .' ' .
+                    (isset($data['address']['country']) ? $data['address']['country'] : '');
+
+                return $result; // Convert the result to JSON and return it
             } else {
                 return null;
             }
