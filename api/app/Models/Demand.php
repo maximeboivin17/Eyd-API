@@ -19,6 +19,7 @@ class Demand extends Model
         'state',
         'created_by',
         'updated_by',
+        'address'
     ];
 
     /**

@@ -57,7 +57,7 @@ class DemandUserController extends Controller
 
         $demand = Demand::find($demandUser->demand_id);
 
-        if (Auth::id() === $demand->created_by) {
+        if (Auth::id() !== $demand->created_by) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cela.']);
         }
 
