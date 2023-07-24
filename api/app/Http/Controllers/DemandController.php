@@ -89,8 +89,8 @@ class DemandController extends Controller
             $response = $client->get($url);
             $data = json_decode($response->getBody(), true);
 
-            if (isset($data['display_name'])) {
-                return $data['display_name'];
+            if (isset($data['address'])) {
+                return $data['address'];
             } else {
                 return null;
             }

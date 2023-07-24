@@ -120,9 +120,12 @@ class UserController extends Controller
     
             return $message;
         });
-    
+        $conversations = $conversations->values();
+
         return response()->json($conversations);
     }
+
+    
 
     public function getConversationsWithUser($otherUserId)
     {

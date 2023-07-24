@@ -17,10 +17,32 @@ class DemandUserController extends Controller
     public function show(string $demandId)
     {
         $demandUsers = DB::table('demands_users')
-            ->where('demand_id', $demandId)
-            ->get();
+        ->join('users', 'demands_users.user_id', '=', 'users.id')
+        ->where('demands_users.demand_id', $demandId)
+        ->select('demands_users.*', 'users.first_name', 'users.last_name', 'users.avatar', 'users.note') // Sélectionnez toutes les colonnes de demands_users et users
+        ->get();
 
-        return response()->json($demandUsers);
+        // Reformater les résultats pour inclure les informations de l'utilisateur dans un objet user
+        $formattedDemandUsers = $demandUsers->map(function ($record) {
+            $user = new \stdClass(); // Créer un nouvel objet vide pour stocker les informations de l'utilisateur
+            $user->first_name = $record->first_name;
+            $user->last_name = $record->last_name;
+            $user->avatar = $record->avatar;
+            $user->note = $record->note;
+            // Ajoutez d'autres propriétés de l'utilisateur que vous souhaitez inclure
+
+            // Supprimez les colonnes de demands_users car elles sont déjà incluses dans l'objet user
+            unset($record->first_name);
+            unset($record->last_name);
+            unset($record->avatar);
+            unset($record->note);
+            // Ajoutez l'objet user au lieu de l'enregistrement complet
+            $record->user = $user;
+
+            return $record;
+        });
+
+        return response()->json($formattedDemandUsers);
     }
 
     public function store(Request $request)
