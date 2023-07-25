@@ -12,12 +12,18 @@ use Illuminate\Support\Facades\Auth;
 class DemandController extends Controller
 {
     public function index(): Collection
-    {
-        // On veut que les demandes qui sont ouvertes et qui n'ont pas de personne qui va aider la personne dans le besoin
-        $demands = Demand::where('state', false)->get();
+{
+    // On veut que les demandes qui sont ouvertes et qui n'ont pas de personne qui va aider la personne dans le besoin
+    $demands = Demand::where('state', false)
+                    ->whereNotIn('id', function ($query) {
+                        $query->select('demand_id')
+                              ->from('demands_users')
+                              ->where('accepted', 1);
+                    })
+                    ->get();
 
-        return $demands;
-    }
+    return $demands;
+}
 
     public function store(Request $request): JsonResponse
     {
