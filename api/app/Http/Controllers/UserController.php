@@ -50,15 +50,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        //Si l'utilisateur est un volontaire je fournis ses avis
-        if ($user->volunteer) {
-            $userToReturn = User::with('comments')->find($user);
-        } else {
-            //Sinon je fournis ses demandes et son/ses handicaps
-            $userToReturn = User::with('demands', 'disabilities')->find($user);
-        }
-
-        return $userToReturn;
+        return $user;
     }
 
     public function update(Request $request, string $id): JsonResponse
@@ -88,13 +80,13 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Votre compte a été supprimé avec succès.']);
     }
-    
+
 
 
     public function getAllMessages()
     {
         $user = auth()->user();
-    
+
         $conversations = Message::where(function ($query) use ($user) {
             $query->where('sender_id', $user->id)
                 ->orWhere('receiver_id', $user->id);
@@ -104,7 +96,7 @@ class UserController extends Controller
         ->unique(function ($message) use ($user) {
             return $message->sender_id === $user->id ? $message->receiver_id : $message->sender_id;
         });
-    
+
         // Afficher seulement les informations de l'autre utilisateur dans chaque message
         $conversations->map(function ($message) use ($user) {
             if ($message->sender_id === $user->id) {
@@ -112,12 +104,12 @@ class UserController extends Controller
             } else {
                 $otherUser = User::find($message->sender_id);
             }
-    
+
             unset($message->sender_id);
             unset($message->receiver_id);
-    
+
             $message->other_user = $otherUser;
-    
+
             return $message;
         });
         $conversations = $conversations->values();
@@ -125,7 +117,7 @@ class UserController extends Controller
         return response()->json($conversations);
     }
 
-    
+
 
     public function getConversationsWithUser($otherUserId)
     {
@@ -150,9 +142,9 @@ class UserController extends Controller
 
         return response()->json($conversations);
     }
-    
-    
-    
-    
+
+
+
+
 
 }
