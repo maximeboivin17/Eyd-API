@@ -77,12 +77,19 @@ class DemandUserController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
+        //Si on envoie false, on supprime la ligne dans la table
+        if ($request->input('accepted') === false){
+            DB::table('demands_users')->where('id', $id)->delete();
+
+            return response()->json(['message' => 'Vous avez refuser l\'aide du volontaire']);
+        }
+
         $demand = Demand::find($demandUser->demand_id);
 
         if (Auth::id() !== $demand->created_by) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cela.']);
         }
-//If pour modifeir selon true ou false
+
         DB::table('demands_users')
             ->where('id', $id)
             ->update(['accepted' => $request->input('accepted')]);
