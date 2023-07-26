@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,15 @@ class CommentController extends Controller
         $commentData['created_by'] = Auth::id();
 
         $comment = Comment::create($commentData);
+
+        // Récupérer l'utilisateur ciblé (volunteer_id)
+        $user = User::findOrFail($commentData['volunteer_id']);
+
+        // Calculer la moyenne des notes de tous les commentaires de l'utilisateur
+        $averageNote = $user->comments()->avg('note');
+
+        // Mettre à jour le champ "note" de l'utilisateur avec la moyenne calculée
+        $user->update(['note' => $averageNote]);
 
         return response()->json($comment, 201);
     }

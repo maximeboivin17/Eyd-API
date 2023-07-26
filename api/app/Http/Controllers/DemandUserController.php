@@ -82,7 +82,7 @@ class DemandUserController extends Controller
         if (Auth::id() !== $demand->created_by) {
             return response()->json(['message' => 'Vous n\'êtes pas autorisé à modifier cela.']);
         }
-
+//If pour modifeir selon true ou false
         DB::table('demands_users')
             ->where('id', $id)
             ->update(['accepted' => $request->input('accepted')]);
