@@ -50,7 +50,13 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        return $user;
+        if ($user->volunteer) {
+            $userToReturn = User::with('comments')->find($user->id);
+        } else {
+            $userToReturn = User::with('demands', 'disabilities')->find($user->id);
+        }
+
+        return $userToReturn;
     }
 
     public function update(Request $request, string $id): JsonResponse
@@ -80,8 +86,6 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Votre compte a été supprimé avec succès.']);
     }
-
-
 
     public function getAllMessages()
     {
@@ -117,8 +121,6 @@ class UserController extends Controller
         return response()->json($conversations);
     }
 
-
-
     public function getConversationsWithUser($otherUserId)
     {
         $user = auth()->user();
@@ -142,9 +144,4 @@ class UserController extends Controller
 
         return response()->json($conversations);
     }
-
-
-
-
-
 }
